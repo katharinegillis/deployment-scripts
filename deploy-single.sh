@@ -3,9 +3,14 @@
 project_name=$1
 service_name=$2
 
-docker compose -f compose.yaml -f compose.prod.yaml pull
-
 old_container_id=$(docker ps -f name="$project_name-$service_name" -q | tail -n1)
+
+if [ "$old_container_id" = "" ]; then
+  docker compose -f compose.yaml -f compose.prod.yaml up -d
+  exit 0;
+fi
+
+docker compose -f compose.yaml -f compose.prod.yaml pull
 
 # bring a new container online, running new code
 # (traefik continues routing to the old container only)
