@@ -2,20 +2,21 @@
 
 project_name=$1
 service_name=$2
+docker_compose_files=$3
 
 old_container_id=$(docker ps -f name="$project_name-$service_name" -q | tail -n1)
 
 if [ "$old_container_id" = "" ]; then
-  docker compose -f compose.yaml -f compose.prod.yaml up -d
+  docker compose $docker_compose_files up -d
   exit 0;
 fi
 
-docker compose -f compose.yaml -f compose.prod.yaml pull
+docker compose $docker_compose_files pull
 
 # bring a new container online, running new code
 # (traefik continues routing to the old container only)
 echo "Starting new container"
-docker compose -f compose.yaml -f compose.prod.yaml up -d --no-deps --scale "$service_name"=2 --no-recreate "$service_name"
+docker compose $docker_compose_files up -d --no-deps --scale "$service_name"=2 --no-recreate "$service_name"
 
 # wait for new container to be available
 new_container_id=$(docker ps -f name="$project_name-$service_name" -q | head -n1)
@@ -53,5 +54,5 @@ else
   exit_code=1
 fi
 
-docker compose -f compose.yaml -f compose.prod.yaml up -d --no-deps --scale "$service_name"=1 --no-recreate "$service_name"
+docker compose $docker_compose_files up -d --no-deps --scale "$service_name"=1 --no-recreate "$service_name"
 exit $exit_code
