@@ -15,6 +15,9 @@ fi
 
 docker compose $docker_compose_files pull
 
+# Run any new docker compose services/configurations
+docker compose up -d
+
 # bring a new container online, running new code
 # (traefik continues routing to the old container only)
 echo "Starting new container"
