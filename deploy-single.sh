@@ -8,10 +8,12 @@ echo $docker_compose_files
 
 old_container_id=$(docker ps -f name="$project_name-$service_name" -q | tail -n1)
 
-docker compose $docker_compose_files pull
+if [ "$old_container_id" = "" ]; then
+  docker compose $docker_compose_files up -d
+  exit 0;
+fi
 
-# Run any new docker compose services/configurations
-docker compose $docker_compose_files up -d
+docker compose $docker_compose_files pull
 
 # bring a new container online, running new code
 # (traefik continues routing to the old container only)
